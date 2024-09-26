@@ -8,6 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            overflow: hidden; /* スクロールバーを非表示 */
         }
         #swipe-area {
             width: 300px;
@@ -129,6 +130,12 @@
             startY = event.touches[0].clientY;
             startTime = new Date().getTime();
         });
+
+        // スワイプ中にスクロールを無効化
+        document.getElementById('swipe-area').addEventListener('touchmove', function(event) {
+            if (!trainingInProgress && !predictionInProgress) return;
+            event.preventDefault(); // 画面のスクロールを無効化
+        }, { passive: false }); // passive: falseを指定してスクロール防止
 
         document.getElementById('swipe-area').addEventListener('touchend', function(event) {
             if (!trainingInProgress && !predictionInProgress) return;
