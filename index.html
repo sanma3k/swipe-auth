@@ -8,23 +8,29 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            overflow: hidden; /* スクロールバーを非表示 */
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
+
         #swipe-area {
-            width: 300px;
-            height: 400px;
+            width: 80vw; /* 画面の幅の80% */
+            height: 60vh; /* 画面の高さの60% */
             border: 2px solid #000;
-            margin: 50px auto;
+            margin: 30px auto;
             position: relative;
         }
-        #message, #gesture-instruction, #user-info {
-            margin-top: 20px;
-            font-size: 18px;
+
+        #message, #gesture-instruction, #user-info, #far-frr, #training-count-message {
+            margin-top: 15px;
+            font-size: 4vw; /* 画面幅の4%に応じたサイズ */
         }
+
         #feature-importance {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 4vw; /* 同じく画面幅に応じたサイズ */
         }
+
         #confirmation-popup {
             display: none;
             position: fixed;
@@ -33,15 +39,28 @@
             transform: translate(-50%, -50%);
             background-color: #f9f9f9;
             border: 1px solid #ccc;
-            padding: 20px;
+            padding: 10px;
+            width: 80vw; /* ポップアップの幅を80%に */
+            max-width: 400px;
             z-index: 1000;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            font-size: 4vw; /* ボタンの文字も同様に調整 */
+            padding: 10px;
+            margin: 10px;
+        }
+
+        input[type="text"] {
+            font-size: 4vw;
+            padding: 5px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 </head>
 <body>
-    <h1>ユーザー別スワイプ認証システム</h1>
-    
+    <h1 style="font-size: 6vw;">ユーザー別スワイプ認証システム</h1>
+
     <div id="user-info">
         <label for="username">ユーザー名を入力してください: </label>
         <input type="text" id="username" placeholder="ユーザー名">
@@ -51,19 +70,17 @@
     <div id="gesture-instruction">ユーザー名を設定してください</div>
     <div id="swipe-area">ここでスワイプしてください</div>
     <div id="message">スワイプ操作を待っています...</div>
-    
+
     <button id="train-model" disabled>モデルをトレーニング</button>
     <button id="predict" disabled>認証する</button>
     <p id="training-count-message"></p>
     <p id="far-frr">FAR: 0, FRR: 0</p>
 
-    <!-- 特徴量の重要度を表示する領域 -->
     <div id="feature-importance">
-        <h3>特徴量の重要度</h3>
+        <h3 style="font-size: 5vw;">特徴量の重要度</h3>
         <ul id="feature-importance-list"></ul>
     </div>
 
-    <!-- 認証後の本人確認ポップアップ -->
     <div id="confirmation-popup">
         <p>認証されたユーザーは本人ですか？</p>
         <button id="confirm-yes">はい</button>
