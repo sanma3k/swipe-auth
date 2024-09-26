@@ -120,7 +120,7 @@
             const usernameInput = document.getElementById('username').value.trim();
             if (usernameInput) {
                 currentUser = usernameInput;
-                document.getElementById('gesture-instruction').textContent = ユーザー: ${currentUser};
+                document.getElementById('gesture-instruction').textContent = `ユーザー: ${currentUser}`;
                 document.getElementById('message').textContent = "操作を開始する準備ができました。";
                 document.getElementById('train-model').disabled = false;
 
@@ -176,10 +176,10 @@
 
             if (trainingInProgress) {
                 swipeDataList.push(swipeData);
-                document.getElementById('message').textContent = データが記録されました: ${gestures[currentGestureIndex]};
+                document.getElementById('message').textContent = `データが記録されました: ${gestures[currentGestureIndex]}`;
             } else if (predictionInProgress) {
                 collectedDataForPrediction.push(swipeData);
-                document.getElementById('message').textContent = 認証データが記録されました: ${gestures[currentGestureIndex]};
+                document.getElementById('message').textContent = `認証データが記録されました: ${gestures[currentGestureIndex]}`;
             }
 
             clearTimeout(timeoutId);
@@ -200,7 +200,7 @@
 
             userModels[username] = model;
             currentModel = model;  // 現在のモデルを更新
-            console.log(モデルがユーザー ${username} 用に作成されました！);
+            console.log(`モデルがユーザー ${username} 用に作成されました！`);
         }
 
         // 次のジェスチャーに進む
@@ -208,7 +208,7 @@
             currentGestureIndex++;
 
             if (currentGestureIndex < gestures.length) {
-                document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
+                document.getElementById('gesture-instruction').textContent = `次の操作: ${gestures[currentGestureIndex]}`;
                 document.getElementById('message').textContent = "スワイプ操作を待っています...";
 
                 timeoutId = setTimeout(() => {
@@ -236,7 +236,7 @@
             currentGestureIndex = 0;
             trainingInProgress = true;
 
-            document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
+            document.getElementById('gesture-instruction').textContent = `次の操作: ${gestures[currentGestureIndex]}`;
             document.getElementById('message').textContent = "スワイプ操作を待っています...";
 
             timeoutId = setTimeout(() => {
@@ -262,7 +262,7 @@
 
             // トレーニング回数を増加
             trainingCounts[currentUser] += 1;
-            document.getElementById('message').textContent = トレーニングが完了しました！ (${trainingCounts[currentUser]} 回目);
+            document.getElementById('message').textContent = `トレーニングが完了しました！ (${trainingCounts[currentUser]} 回目)`;
 
             // 特徴量の重要度を表示
             displayFeatureImportance();
@@ -281,7 +281,7 @@
             importanceList.innerHTML = '';
             features.forEach((feature, index) => {
                 const importanceItem = document.createElement('li');
-                importanceItem.textContent = ${feature}: ${importances[index].toFixed(2)};
+                importanceItem.textContent = `${feature}: ${importances[index].toFixed(2)}`;
                 importanceList.appendChild(importanceItem);
             });
         }
@@ -294,7 +294,7 @@
             currentGestureIndex = 0;
             predictionInProgress = true;
 
-            document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
+            document.getElementById('gesture-instruction').textContent = `次の操作: ${gestures[currentGestureIndex]}`;
             document.getElementById('message').textContent = "認証のためにスワイプ操作を行ってください...";
 
             timeoutId = setTimeout(() => {
@@ -348,7 +348,7 @@
         // FAR/FRRの表示を更新
         function updateFarFrrDisplay() {
             const farFrr = farFrrData[currentUser];
-            document.getElementById('far-frr').textContent = FAR: ${farFrr.far.toFixed(2)}, FRR: ${farFrr.frr.toFixed(2)};
+            document.getElementById('far-frr').textContent = `FAR: ${farFrr.far.toFixed(2)}, FRR: ${farFrr.frr.toFixed(2)}`;
         }
 
         // トレーニング回数の更新
@@ -358,10 +358,10 @@
 
             if (trainingCount >= 3) {
                 document.getElementById('predict').disabled = false; // 3回トレーニングしたら認証ボタン有効化
-                messageElement.textContent = トレーニング済み: ${trainingCount} 回 - 認証が可能です。;
+                messageElement.textContent = `トレーニング済み: ${trainingCount} 回 - 認証が可能です。`;
             } else {
                 document.getElementById('predict').disabled = true; // 3回未満の場合認証ボタン無効化
-                messageElement.textContent = トレーニング済み: ${trainingCount} 回 - 認証はあと ${3 - trainingCount} 回のトレーニングが必要です。;
+                messageElement.textContent = `トレーニング済み: ${trainingCount} 回 - 認証はあと ${3 - trainingCount} 回のトレーニングが必要です。`;
             }
         }
 
