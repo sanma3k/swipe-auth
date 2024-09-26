@@ -10,7 +10,7 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* 水平方向のスクロールを無効化 */
+            overflow: hidden;
         }
 
         #swipe-area {
@@ -19,7 +19,6 @@
             border: 2px solid #000;
             margin: 30px auto;
             position: relative;
-            touch-action: none; /* スワイプ領域内のジェスチャーを制御 */
         }
 
         #message, #gesture-instruction, #user-info, #far-frr, #training-count-message {
@@ -91,10 +90,10 @@
     <script>
         // ユーザーごとのモデルとトレーニング回数、およびFARとFRRを保持するためのオブジェクト
         const userModels = {};
-        const trainingCounts = {};
-        const farFrrData = {};
+        const trainingCounts = {};  // ユーザーごとのトレーニング回数を保持
+        const farFrrData = {};  // ユーザーごとのFARとFRRを保存
         let currentUser = '';
-        let currentModel = null;
+        let currentModel = null;  // 現在のユーザーのモデルを保持
         let swipeDataList = [];
         let collectedDataForPrediction = [];
         let currentGestureIndex = 0;
@@ -102,8 +101,9 @@
         let trainingInProgress = false;
         let predictionInProgress = false;
         let timeoutId;
-        let lastPredictionResult = '';
+        let lastPredictionResult = '';  // 最後の認証結果（成功または失敗）
 
+        // ジェスチャーリスト
         const gestures = [
             "左から右へスワイプ",
             "右から左へスワイプ",
@@ -112,26 +112,29 @@
             "円を描くようにスワイプ"
         ];
 
+        // 特徴量リスト
         const features = ['速度', '距離', '角度', '時間'];
 
+        // ユーザー名を設定する
         document.getElementById('set-username').addEventListener('click', function() {
             const usernameInput = document.getElementById('username').value.trim();
             if (usernameInput) {
                 currentUser = usernameInput;
-                document.getElementById('gesture-instruction').textContent = `ユーザー: ${currentUser}`;
+                document.getElementById('gesture-instruction').textContent = ユーザー: ${currentUser};
                 document.getElementById('message').textContent = "操作を開始する準備ができました。";
                 document.getElementById('train-model').disabled = false;
 
+                // ユーザーが初めてでない場合、トレーニング回数やモデルを読み込む
                 if (!userModels[currentUser]) {
                     createModelForUser(currentUser);
-                    trainingCounts[currentUser] = 0;
-                    farFrrData[currentUser] = { far: 0, frr: 0, falseAccepts: 0, falseRejects: 0, totalAttempts: 0 };
+                    trainingCounts[currentUser] = 0;  // 新しいユーザーはトレーニング回数を0にする
+                    farFrrData[currentUser] = { far: 0, frr: 0, falseAccepts: 0, falseRejects: 0, totalAttempts: 0 }; // FAR, FRRを初期化
                 } else {
                     currentModel = userModels[currentUser];
                 }
 
-                updateTrainingStatus();
-                updateFarFrrDisplay();
+                updateTrainingStatus();  // トレーニング回数を更新
+                updateFarFrrDisplay();  // FARとFRRの表示を更新
             } else {
                 document.getElementById('message').textContent = "ユーザー名を入力してください。";
             }
@@ -145,11 +148,11 @@
             startTime = new Date().getTime();
         });
 
-        // スワイプ中にスクロールを無効化するのは `#swipe-area` 内だけに変更
+        // スワイプ中にスクロールを無効化
         document.getElementById('swipe-area').addEventListener('touchmove', function(event) {
             if (!trainingInProgress && !predictionInProgress) return;
-            event.preventDefault(); // ここでだけスクロールを無効化
-        }, { passive: false });
+            event.preventDefault(); // 画面のスクロールを無効化
+        }, { passive: false }); // passive: falseを指定してスクロール防止
 
         document.getElementById('swipe-area').addEventListener('touchend', function(event) {
             if (!trainingInProgress && !predictionInProgress) return;
@@ -173,16 +176,17 @@
 
             if (trainingInProgress) {
                 swipeDataList.push(swipeData);
-                document.getElementById('message').textContent = `データが記録されました: ${gestures[currentGestureIndex]}`;
+                document.getElementById('message').textContent = データが記録されました: ${gestures[currentGestureIndex]};
             } else if (predictionInProgress) {
                 collectedDataForPrediction.push(swipeData);
-                document.getElementById('message').textContent = `認証データが記録されました: ${gestures[currentGestureIndex]}`;
+                document.getElementById('message').textContent = 認証データが記録されました: ${gestures[currentGestureIndex]};
             }
 
             clearTimeout(timeoutId);
             nextGesture();
         });
 
+        // ユーザーごとのモデルを作成する関数
         function createModelForUser(username) {
             const model = tf.sequential();
             model.add(tf.layers.dense({ units: 10, activation: 'relu', inputShape: [4] }));
@@ -195,14 +199,16 @@
             });
 
             userModels[username] = model;
-            currentModel = model;
+            currentModel = model;  // 現在のモデルを更新
+            console.log(モデルがユーザー ${username} 用に作成されました！);
         }
 
+        // 次のジェスチャーに進む
         function nextGesture() {
             currentGestureIndex++;
 
             if (currentGestureIndex < gestures.length) {
-                document.getElementById('gesture-instruction').textContent = `次の操作: ${gestures[currentGestureIndex]}`;
+                document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
                 document.getElementById('message').textContent = "スワイプ操作を待っています...";
 
                 timeoutId = setTimeout(() => {
@@ -222,6 +228,7 @@
             }
         }
 
+        // トレーニング開始
         document.getElementById('train-model').addEventListener('click', function() {
             if (trainingInProgress || predictionInProgress) return;
 
@@ -229,7 +236,7 @@
             currentGestureIndex = 0;
             trainingInProgress = true;
 
-            document.getElementById('gesture-instruction').textContent = `次の操作: ${gestures[currentGestureIndex]}`;
+            document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
             document.getElementById('message').textContent = "スワイプ操作を待っています...";
 
             timeoutId = setTimeout(() => {
@@ -238,6 +245,7 @@
             }, 10000);
         });
 
+        // モデルのトレーニング
         async function trainModel() {
             if (swipeDataList.length === 0) {
                 document.getElementById('message').textContent = "トレーニングデータがありません";
@@ -252,13 +260,50 @@
 
             await currentModel.fit(xs, ys, { epochs: 10 });
 
+            // トレーニング回数を増加
             trainingCounts[currentUser] += 1;
-            document.getElementById('message').textContent = `トレーニングが完了しました！ (${trainingCounts[currentUser]} 回目)`;
+            document.getElementById('message').textContent = トレーニングが完了しました！ (${trainingCounts[currentUser]} 回目);
 
+            // 特徴量の重要度を表示
             displayFeatureImportance();
-            updateTrainingStatus();
+            updateTrainingStatus();  // トレーニング回数の更新
         }
 
+        // 特徴量の重要度を表示する関数
+        function displayFeatureImportance() {
+            const weights = currentModel.layers[0].getWeights()[0].arraySync();  // モデルの重みを取得
+
+            // 特徴量の重要度を計算
+            const importances = weights.map(weightArray => Math.abs(weightArray.reduce((acc, val) => acc + val, 0)));
+
+            // 特徴量ごとの重要度を表示
+            const importanceList = document.getElementById('feature-importance-list');
+            importanceList.innerHTML = '';
+            features.forEach((feature, index) => {
+                const importanceItem = document.createElement('li');
+                importanceItem.textContent = ${feature}: ${importances[index].toFixed(2)};
+                importanceList.appendChild(importanceItem);
+            });
+        }
+
+        // 認証開始
+        document.getElementById('predict').addEventListener('click', function() {
+            if (trainingInProgress || predictionInProgress) return;
+
+            collectedDataForPrediction = [];
+            currentGestureIndex = 0;
+            predictionInProgress = true;
+
+            document.getElementById('gesture-instruction').textContent = 次の操作: ${gestures[currentGestureIndex]};
+            document.getElementById('message').textContent = "認証のためにスワイプ操作を行ってください...";
+
+            timeoutId = setTimeout(() => {
+                document.getElementById('message').textContent = "時間切れです！次の操作に進みます...";
+                nextGesture();
+            }, 10000);
+        });
+
+        // 認証（予測）
         async function predictGesture() {
             if (collectedDataForPrediction.length === 0 || !currentModel) {
                 document.getElementById('message').textContent = "認証データが不足しているか、モデルがありません";
@@ -271,81 +316,83 @@
             const predictions = currentModel.predict(xs);
             const results = await predictions.array();
 
+            // 結果を集計し、FAR/FRRを計算
             const successCount = results.filter(result => result[0] > 0.5).length;
             lastPredictionResult = successCount > gestures.length / 2 ? "認証成功！" : "認証失敗！";
 
             document.getElementById('message').textContent = lastPredictionResult;
+
+            // 認証後に本人確認ポップアップを表示
             showConfirmationPopup();
         }
 
-        function displayFeatureImportance() {
-            const weights = currentModel.layers[0].getWeights()[0].arraySync();
-            const importances = weights.map(weightArray => Math.abs(weightArray.reduce((acc, val) => acc + val, 0)));
-
-            const importanceList = document.getElementById('feature-importance-list');
-            importanceList.innerHTML = '';
-            features.forEach((feature, index) => {
-                const importanceItem = document.createElement('li');
-                importanceItem.textContent = `${feature}: ${importances[index].toFixed(2)}`;
-                importanceList.appendChild(importanceItem);
-            });
-        }
-
-        function updateFarFrrDisplay() {
-            const farFrr = farFrrData[currentUser];
-            document.getElementById('far-frr').textContent = `FAR: ${farFrr.far.toFixed(2)}, FRR: ${farFrr.frr.toFixed(2)}`;
-        }
-
-        function updateTrainingStatus() {
-            const trainingCount = trainingCounts[currentUser];
-            const messageElement = document.getElementById('training-count-message');
-
-            if (trainingCount >= 3) {
-                document.getElementById('predict').disabled = false;
-                messageElement.textContent = `トレーニング済み: ${trainingCount} 回 - 認証が可能です。`;
-            } else {
-                document.getElementById('predict').disabled = true;
-                messageElement.textContent = `トレーニング済み: ${trainingCount} 回 - 認証はあと ${3 - trainingCount} 回のトレーニングが必要です。`;
-            }
-        }
-
-        function showConfirmationPopup() {
-            const popup = document.getElementById('confirmation-popup');
-            popup.style.display = 'block';
-        }
-
-        document.getElementById('confirm-yes').addEventListener('click', function() {
-            const isSuccess = (lastPredictionResult === "認証成功！");
-            updateFarFrr(isSuccess);
-            closeConfirmationPopup();
-        });
-
-        document.getElementById('confirm-no').addEventListener('click', function() {
-            const isSuccess = (lastPredictionResult === "認証成功！");
-            updateFarFrr(!isSuccess);
-            closeConfirmationPopup();
-        });
-
+        // FAR/FRRを更新
         function updateFarFrr(isSuccess) {
             const farFrr = farFrrData[currentUser];
+
+            // 認証試行回数を増やす
             farFrr.totalAttempts += 1;
 
+            // 誤受容か誤拒否かを記録
             if (isSuccess) {
                 farFrr.falseAccepts += 1;
             } else {
                 farFrr.falseRejects += 1;
             }
 
+            // FARとFRRを計算
             farFrr.far = farFrr.falseAccepts / farFrr.totalAttempts;
             farFrr.frr = farFrr.falseRejects / farFrr.totalAttempts;
         }
 
+        // FAR/FRRの表示を更新
+        function updateFarFrrDisplay() {
+            const farFrr = farFrrData[currentUser];
+            document.getElementById('far-frr').textContent = FAR: ${farFrr.far.toFixed(2)}, FRR: ${farFrr.frr.toFixed(2)};
+        }
+
+        // トレーニング回数の更新
+        function updateTrainingStatus() {
+            const trainingCount = trainingCounts[currentUser];
+            const messageElement = document.getElementById('training-count-message');
+
+            if (trainingCount >= 3) {
+                document.getElementById('predict').disabled = false; // 3回トレーニングしたら認証ボタン有効化
+                messageElement.textContent = トレーニング済み: ${trainingCount} 回 - 認証が可能です。;
+            } else {
+                document.getElementById('predict').disabled = true; // 3回未満の場合認証ボタン無効化
+                messageElement.textContent = トレーニング済み: ${trainingCount} 回 - 認証はあと ${3 - trainingCount} 回のトレーニングが必要です。;
+            }
+        }
+
+        // 認証後に本人確認ポップアップを表示
+        function showConfirmationPopup() {
+            const popup = document.getElementById('confirmation-popup');
+            popup.style.display = 'block';
+        }
+
+        // 本人確認ポップアップで「はい」を押した場合
+        document.getElementById('confirm-yes').addEventListener('click', function() {
+            const isSuccess = (lastPredictionResult === "認証成功！");
+            updateFarFrr(isSuccess); // 認証成功が正当な場合、FAR/FRRを更新
+            closeConfirmationPopup();
+        });
+
+        // 本人確認ポップアップで「いいえ」を押した場合
+        document.getElementById('confirm-no').addEventListener('click', function() {
+            const isSuccess = (lastPredictionResult === "認証成功！");
+            updateFarFrr(!isSuccess); // 認証失敗または成功が誤りの場合、FAR/FRRを更新
+            closeConfirmationPopup();
+        });
+
+        // 本人確認ポップアップを閉じる
         function closeConfirmationPopup() {
             const popup = document.getElementById('confirmation-popup');
             popup.style.display = 'none';
-            updateFarFrrDisplay();
+            updateFarFrrDisplay(); // FAR/FRRを再表示
         }
 
+        // ページ読み込み時にモデルを作成
         window.onload = async function() {
             console.log("準備完了");
         }
